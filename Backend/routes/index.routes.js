@@ -1,10 +1,9 @@
-import { Router } from 'express';
-import { getIndex,getPing } from './../controllers/index.controllers.js';
+import { Router } from "express";
+import { getIndex, getPing } from "../controllers/index.controllers.js";
 
-const indexRoutes = Router();
+const router = Router();
 
-indexRoutes.get('/', getIndex);
-indexRoutes.get('/about', getPing);
+router.get("/", getIndex);
+router.get("/ping", getPing);
 
-
-export default indexRoutes;
+export default router;

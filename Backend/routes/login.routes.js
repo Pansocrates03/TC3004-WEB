@@ -1,11 +1,8 @@
-import { Router } from 'express';
-import { getLogin, signUp, deleteLogin,putLogin } from '../controllers/login.controllers.js';
+import { Router } from "express";
+import { login } from "../controllers/login.controllers.js";
 
-const loginRouter = Router();
+const router = Router();
 
-loginRouter.get('/login/:id', getLogin);
-loginRouter.post('/login/', signUp);
-loginRouter.put('/login/:id', putLogin);
-loginRouter.delete('/login/:id', deleteLogin);
+router.post("/login/", login);
 
-export default loginRouter;
+export default router;

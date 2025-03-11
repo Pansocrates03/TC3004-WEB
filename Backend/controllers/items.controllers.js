@@ -1,61 +1,54 @@
-import sql from "mssql"
-import sqlConnect from "../utils/sql.js";
+import { sqlConnect, sql } from "../utils/sql.js";
 
-export const getItems = async(req,res) => {
-    try {
-        const pool = await sqlConnect();
-        console.log("Conexión exitosa");
-        const data = await pool.request().query("SELECT * FROM test.items");
-        console.log("Consulta exitosa");
-        res.json(data.recordset);
-    }
-    catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+export const getItems = async (req, res) => {
+  const pool = await sqlConnect();
+  const data = await pool.request().query("select * from items");
+  // console.log(data.recordset);
+  res.json(data.recordset);
+};
+export const getItem = async (req, res) => {
+  const pool = await sqlConnect();
+  const data = await pool
+    .request()
+    .input("myId", sql.Int, req.params.id)
+    .query("select * from items where id = @myId");
+  // console.log(data.recordset);
+  res.json(data.recordset);
 };
 
-export const getItem = async(req,res) => {
-    const pool = await sqlConnect();
-    const data = await pool
-        .request()
-        .input("id", sql.Int, req.params.id)
-        .query(`SELECT * FROM test.items WHERE id = @id`);
-    res.json(data.recordset);
-}
+export const postItem = async (req, res) => {
+  const pool = await sqlConnect();
+  await pool
+    .request()
+    .input("name", sql.VarChar, req.body.name)
+    .input("price", sql.Float, req.body.price)
+    .query("insert into items (name, price) values (@name, @price)");
+  const data = await pool
+    .request()
+    .input("name", sql.VarChar, req.body.name)
+    .query("select * from items where name = @name");
+  // console.log(data.recordset);
+  res.status(200).json({ operation: true, item: data.recordset[0] });
+};
 
-
-export const postItem = async(req, res) => {
-    if(!req.body.name || !req.body.price) {
-        return res.status(400).json({ error: "Bad request" });   
-    }
-    const pool = await sqlConnect();
-    await pool
-        .request()
-        .input("name", sql.VarChar, req.body.name)
-        .input("price", sql.Decimal, req.body.price)
-        .query(`INSERT INTO test.items (name, price) VALUES (@name, @price)`);
-    const data = await pool.request()
-        .input('name', sql.VarChar, req.body.name)
-        .query('SELECT * FROM test.items WHERE name = @name');
-    res.status(200).json({ operation: true, insertedData: data.recordset });
-}
-
-export const deleteItem = async(req, res) => {
-    const pool = await sqlConnect();
-    const data = await pool
+export const putItem = async (req, res) => {
+  const pool = await sqlConnect();
+  const data = await pool
     .request()
     .input("id", sql.Int, req.params.id)
-    .query(`DELETE FROM test.items WHERE id = @id`);
-    res.status(200).json({ operation: true });
-}
+    .input("name", sql.VarChar, req.body.name)
+    .input("price", sql.Float, req.body.price)
+    .query("update items set name=@name, price=@price where id=@id");
+  // console.log(data.recordset);
+  res.status(200).json({ operation: true });
+};
 
-export const putItem = async(req, res) => {
-    const pool = await sqlConnect();
-    const data = await pool
-        .request()
-        .input("id", sql.Int, req.params.id)
-        .input("name", sql.VarChar, req.body.name)
-        .input("price", sql.Decimal, req.body.price)
-        .query(`UPDATE test.items SET name = @name, price = @price WHERE id = @id`);
-    res.status(200).json({ operation: true });
-}
+export const deleteItem = async (req, res) => {
+  const pool = await sqlConnect();
+  const data = await pool
+    .request()
+    .input("id", sql.Int, req.params.id)
+    .query("delete from items where id=@id");
+  // console.log(data.recordset);
+  res.status(200).json({ operation: true });
+};
